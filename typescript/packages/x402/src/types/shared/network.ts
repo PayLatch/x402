@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 export const NetworkSchema = z.enum([
+  "hedera-testnet",
+  "hedera",
+  "somnia-testnet",
+  "somnia",
+  "arc-testnet",
   "abstract",
   "abstract-testnet",
   "base-sepolia",
@@ -20,6 +25,11 @@ export type Network = z.infer<typeof NetworkSchema>;
 
 // evm
 export const SupportedEVMNetworks: Network[] = [
+  "hedera-testnet",
+  "hedera",
+  "somnia-testnet",
+  "somnia",
+  "arc-testnet",
   "abstract",
   "abstract-testnet",
   "base-sepolia",
@@ -34,6 +44,11 @@ export const SupportedEVMNetworks: Network[] = [
   "peaq",
 ];
 export const EvmNetworkToChainId = new Map<Network, number>([
+  ["hedera-testnet", 296],
+  ["hedera", 295],
+  ["somnia-testnet", 50312],
+  ["somnia", 5031],
+  ["arc-testnet", 5042002],
   ["abstract", 2741],
   ["abstract-testnet", 11124],
   ["base-sepolia", 84532],

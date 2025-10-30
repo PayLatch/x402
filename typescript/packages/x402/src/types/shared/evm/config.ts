@@ -2,6 +2,26 @@ import { Address } from "viem";
 import { Address as SolanaAddress } from "@solana/kit";
 
 export const config: Record<string, ChainConfig> = {
+  "296": {
+    usdcAddress: "0x0000000000000000000000000000000000068cda",
+    usdcName: "USDC",
+  },
+  "295": {
+    usdcAddress: "0x000000000000000000000000000000000006f89a",
+    usdcName: "USDC",
+  },  
+  "50312": {
+    usdcAddress: "0x0ED782B8079529f7385c3eDA9fAf1EaA0DbC6a17",
+    usdcName: "USDC",
+  },
+  "5031": {
+    usdcAddress: "0x28BEc7E30E6faee657a03e19Bf1128AaD7632A00",
+    usdcName: "USDC.e",
+  },
+  "5042002": {
+    usdcAddress: "0x3600000000000000000000000000000000000000",
+    usdcName: "USDC", 
+  },
   "84532": {
     usdcAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
     usdcName: "USDC",

@@ -24,9 +24,12 @@ import {
   iotex,
   abstract,
   abstractTestnet,
+  hederaTestnet,
+  hedera,
+  somniaTestnet,
 } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
-import { Hex } from "viem";
+import { Hex ,defineChain} from "viem";
 import { eip712WalletActions } from "viem/zksync";
 
 // Create a public client for reading data
@@ -188,6 +191,71 @@ export function isAccount<
   );
 }
 
+// Somnia mainnet chain configuration
+export const somnia = defineChain({
+  id: 5031,
+  name: 'Somnia mainnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Wrapped SOMI',
+    symbol: 'WSOMI',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://api.infra.mainnet.somnia.network/'],
+    },
+  },
+  blockExplorers: {
+    default: { name: 'Explorer', url: 'https://explorer.somnia.network/' },
+  },
+  contracts: {
+    multicall3: {
+      address: '0x5e44F178E8cF9B2F5409B6f18ce936aB817C5a11',
+      blockCreated: 132474944,
+    },
+  },
+  testnet: false,
+
+})
+
+// arc testnet chain configuration
+export const arcTestnet = /*#__PURE__*/ defineChain({
+  id: 5042002,
+  name: 'Arc Testnet',
+  nativeCurrency: {
+    name: 'USDC',
+    symbol: 'USDC',
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: [
+        'https://rpc.testnet.arc.network',
+        'https://rpc.quicknode.testnet.arc.network',
+        'https://rpc.blockdaemon.testnet.arc.network',
+      ],
+      webSocket: [
+        'wss://rpc.testnet.arc.network',
+        'wss://rpc.quicknode.testnet.arc.network',
+      ],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'ArcScan',
+      url: 'https://testnet.arcscan.app',
+      apiUrl: 'https://testnet.arcscan.app/api',
+    },
+  },
+  contracts: {
+    multicall3: {
+      address: '0xcA11bde05977b3631167028862bE2a173976CA11',
+      blockCreated: 0,
+    },
+  },
+  testnet: true,
+})
+
 /**
  * Maps network strings to Chain objects
  *
@@ -200,6 +268,16 @@ export function getChainFromNetwork(network: string | undefined): Chain {
   }
 
   switch (network) {
+    case "hedera-testnet":
+      return hederaTestnet;
+    case "hedera":
+      return hedera;
+    case "somnia-testnet":
+      return somniaTestnet;
+    case "somnia":
+      return somnia;
+    case "arc-testnet":
+      return arcTestnet;
     case "abstract":
       return abstract;
     case "abstract-testnet":
