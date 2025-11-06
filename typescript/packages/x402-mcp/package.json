@@ -1,5 +1,5 @@
 {
-  "name": "x402-mcp",
+  "name": "@paylatch/x402-mcp",
   "version": "0.7.1",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@solana/kit": "^2.1.1",
+    "@modelcontextprotocol/sdk": "^1.20.2",
     "viem": "^2.21.26",
     "x402": "workspace:^",
     "zod": "^3.24.2"

@@ -2,7 +2,7 @@
  * X402 MCP Integration
  *
  * Based on:
- * - 
+ * https://github.com/cloudflare/agents/blob/main/packages/agents/src/mcp/x402.ts
  */
 
 import type {
@@ -19,6 +19,8 @@ import type {
   ToolAnnotations
 } from "@modelcontextprotocol/sdk/types.js";
 import type { ZodRawShape } from "zod";
+import { Address, getAddress } from "viem";
+import { Address as SolanaAddress } from "@solana/kit";
 
 import { processPriceToAtomicAmount } from "x402/shared";
 import { exact } from "x402/schemes";
@@ -36,7 +38,6 @@ import type {
   ERC20TokenAmount
 } from "x402/types";
 import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import { getAddress } from "viem";
 
 /*
   ======= SERVER SIDE =======
@@ -44,7 +45,7 @@ import { getAddress } from "viem";
 
 export type X402Config = {
   network: Network;
-  recipient: `0x${string}` | string; // Support both EVM and Solana addresses
+  recipient: Address | SolanaAddress;
   facilitator: FacilitatorConfig;
   version?: number;
 };
@@ -101,8 +102,8 @@ export function withX402<T extends McpServer>(
             scheme: "exact" as const,
             network: cfg.network,
             maxAmountRequired,
-            payTo: getAddress(cfg.recipient as `0x${string}`),
-            asset: getAddress(asset.address),
+            payTo: getAddress(cfg.recipient as Address),
+            asset: getAddress(asset.address as Address),
             maxTimeoutSeconds: 300,
             resource: `x402://${name}`,
             mimeType: "application/json" as const,
@@ -141,7 +142,7 @@ export function withX402<T extends McpServer>(
             scheme: "exact" as const,
             network: cfg.network,
             maxAmountRequired,
-            payTo: cfg.recipient,
+            payTo: cfg.recipient as SolanaAddress,
             asset: asset.address,
             maxTimeoutSeconds: 300,
             resource: `x402://${name}`,
@@ -439,7 +440,7 @@ export function withX402Client<T extends MCPClient>(
   return _client;
 }
 
-// Re-export types
+// Re-export types matching x402-express pattern
 export type {
   Network,
   Signer,
@@ -447,3 +448,4 @@ export type {
   PaymentRequirements,
   FacilitatorConfig
 } from "x402/types";
+export type { Address as SolanaAddress } from "@solana/kit";

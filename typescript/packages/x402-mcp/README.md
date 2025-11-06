@@ -1,200 +1,166 @@
-# x402-hono
+# x402-mcp
 
-Hono middleware integration for the x402 Payment Protocol. This package allows you to easily add paywall functionality to your Hono applications using the x402 protocol.
+Model Context Protocol (MCP) integration for the x402 Payment Protocol. This package allows you to add payment functionality to your MCP servers and clients using the x402 protocol, supporting both EVM (Ethereum) and SVM (Solana) networks.
 
 ## Installation
 
 ```bash
-npm install x402-hono
+npm install @paylatch/x402-mcp
 ```
 
 ## Quick Start
 
+### Server Side (TypeScript)
+
 ```typescript
-import { Hono } from "hono";
-import { paymentMiddleware, Network } from "x402-hono";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { withX402 } from "@paylatch/x402-mcp";
+import { z } from "zod";
 
-const app = new Hono();
-
-// Configure the payment middleware
-app.use(paymentMiddleware(
-  "0xYourAddress",
-  {
-    "/protected-route": {
-      price: "$0.10",
-      network: "base-sepolia",
-      config: {
-        description: "Access to premium content",
-      }
-    }
-  }
-));
-
-// Implement your route
-app.get("/protected-route", (c) => {
-  return c.json({ message: "This content is behind a paywall" });
+const server = new McpServer({
+  name: "my-paid-mcp-server",
+  version: "1.0.0"
 });
 
-serve({
-  fetch: app.fetch,
-  port: 3000
+// Add x402 payment support
+const paidServer = withX402(server, {
+  network: "base-sepolia",
+  recipient: "0xYourAddress", // EVM address for base-sepolia
+  facilitator: {
+    url: "https://x402.org/facilitator"
+  }
+});
+
+// Create a paid tool
+paidServer.paidTool(
+  "premium-data",
+  "Get premium data",
+  0.10, // Price in USD
+  {
+    query: z.string().describe("Your query")
+  },
+  {},
+  async (args) => {
+    return {
+      content: [
+        { type: "text", text: `Premium result for: ${args.query}` }
+      ]
+    };
+  }
+);
+```
+
+### Client Side (TypeScript)
+
+```typescript
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { withX402Client } from "@paylatch/x402-mcp";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { baseSepolia } from "viem/chains";
+
+// Create wallet client
+const account = privateKeyToAccount("0xYourPrivateKey");
+const walletClient = createWalletClient({
+  account,
+  transport: http(),
+  chain: baseSepolia
+});
+
+// Create MCP client with payment support
+const client = new Client({
+  name: "my-client",
+  version: "1.0.0"
+});
+
+const paidClient = withX402Client(client, {
+  walletClient,
+  maxPaymentValue: BigInt(0.1 * 10 ** 6), // 0.10 USDC max
+  confirmationCallback: async (requirements) => {
+    console.log("Payment required:", requirements);
+    return true; // Auto-approve
+  }
+});
+
+// Call a paid tool
+const result = await paidClient.callTool(
+  null, // or provide custom confirmation callback
+  {
+    name: "premium-data",
+    arguments: { query: "test" }
+  }
+);
+```
+
+## Multi-Network Support
+
+x402-mcp supports all networks available in the x402 SDK, including:
+
+### EVM Networks
+
+  - base
+  - base-sepolia
+  - And other EVM-compatible chains
+
+### Solana Networks
+
+  - solana
+  - solana-devnet
+
+### Example with Solana (TypeScript)
+
+```typescript
+// Server configuration for Solana
+const paidServer = withX402(server, {
+  network: "solana-devnet",
+  recipient: "YourSolanaAddress", // Solana address
+  facilitator: {
+    url: "https://x402.org/facilitator"
+  }
 });
 ```
+
+The facilitator automatically provides network-specific metadata (like fee payers for Solana transactions).
 
 ## Configuration
 
-The `paymentMiddleware` function accepts three parameters:
-
-1. `payTo`: Your receiving address (`0x${string}`)
-2. `routes`: Route configurations for protected endpoints
-3. `facilitator`: (Optional) Configuration for the x402 facilitator service
-4. `paywall`: (Optional) Configuration for the built-in paywall
-
-See the Middleware Options section below for detailed configuration options.
-
-## Middleware Options
-
-The middleware supports various configuration options:
-
-### Route Configuration
+### Server Configuration (X402Config)
 
 ```typescript
-type RoutesConfig = Record<string, Price | RouteConfig>;
-
-interface RouteConfig {
-  price: Price;           // Price in USD or token amount
-  network: Network;       // "base" or "base-sepolia"
-  config?: PaymentMiddlewareConfig;
-}
-```
-
-### Payment Configuration
-
-```typescript
-interface PaymentMiddlewareConfig {
-  description?: string;               // Description of the payment
-  mimeType?: string;                  // MIME type of the resource
-  maxTimeoutSeconds?: number;         // Maximum time for payment (default: 60)
-  outputSchema?: Record<string, any>; // JSON schema for the response
-  customPaywallHtml?: string;         // Custom HTML for the paywall
-  resource?: string;                  // Resource URL (defaults to request URL)
-}
-```
-
-### Facilitator Configuration
-
-```typescript
-type FacilitatorConfig = {
-  url: string;                        // URL of the x402 facilitator service
-  createAuthHeaders?: CreateHeaders;  // Optional function to create authentication headers
+type X402Config = {
+  network: Network;                    // Network to use
+  recipient: Address | SolanaAddress;  // Payment recipient address
+  facilitator: FacilitatorConfig;      // Facilitator service config
+  version?: number;                    // x402 version (default: 1)
 };
 ```
 
-
-### Paywall Configuration
-
-For more on paywall configuration options, refer to the [paywall README](../x402/src/paywall/README.md).
+### Client Configuration (X402ClientConfig)
 
 ```typescript
-type PaywallConfig = {
-  cdpClientKey?: string;              // Your CDP Client API Key
-  appName?: string;                   // Name displayed in the paywall wallet selection modal
-  appLogo?: string;                   // Logo for the paywall wallet selection modal
-  sessionTokenEndpoint?: string;      // API endpoint for Coinbase Onramp session authentication
+type X402ClientConfig = {
+  walletClient: Signer | MultiNetworkSigner;  // Wallet for signing payments
+  maxPaymentValue?: bigint;                   // Max payment cap (default: 0.10 USDC)
+  version?: number;                           // x402 version (default: 1)
+  confirmationCallback?: (requirements: PaymentRequirements[]) => Promise<boolean>;
+  x402Config?: {
+    svmConfig?: { rpcUrl?: string };          // Custom Solana RPC
+    evmConfig?: { rpcUrls?: Record<Network, string> };  // Custom EVM RPCs
+  };
 };
 ```
 
-## Optional: Coinbase Onramp Integration
+## Features
 
-**Note**: Onramp integration is completely optional. Your x402 paywall will work perfectly without it. This feature is for users who want to provide an easy way for their customers to fund their wallets directly from the paywall.
-
-When configured, a "Get more USDC" button will appear in your paywall, allowing users to purchase USDC directly through Coinbase Onramp.
-
-### Quick Setup
-
-#### 1. Create the Session Token Route
-
-Add a session token endpoint to your Hono app:
-
-```typescript
-import { Hono } from "hono";
-import { POST } from "x402-hono/session-token";
-
-const app = new Hono();
-
-// Add the session token endpoint
-app.post("/api/x402/session-token", POST);
-```
-
-#### 2. Configure Your Middleware
-
-Add `sessionTokenEndpoint` to your middleware configuration. This tells the paywall where to find your session token API:
-
-```typescript
-app.use(paymentMiddleware(
-  payTo,
-  routes,
-  facilitator,
-  {
-    sessionTokenEndpoint: "path/to/session-token-route",
-  }
-));
-```
-
-**Important**: The `sessionTokenEndpoint` must match the route you created above. You can use any path you prefer - just make sure both the route and configuration use the same path. Without this configuration, the "Get more USDC" button will be hidden.
-
-#### 3. Get CDP API Keys
-
-1. Go to [CDP Portal](https://portal.cdp.coinbase.com/)
-2. Navigate to your project's **[API Keys](https://portal.cdp.coinbase.com/projects/api-keys)**
-3. Click **Create API key**
-4. Download and securely store your API key
-
-#### 4. Enable Onramp Secure Initialization in CDP Portal
-
-1. Go to [CDP Portal](https://portal.cdp.coinbase.com/)
-2. Navigate to **Payments → [Onramp & Offramp](https://portal.cdp.coinbase.com/products/onramp)**
-3. Toggle **"Enforce secure initialization"** to **Enabled**
-
-#### 5. Set Environment Variables
-
-Add your CDP API keys to your environment:
-
-```bash
-# .env
-CDP_API_KEY_ID=your_secret_api_key_id_here
-CDP_API_KEY_SECRET=your_secret_api_key_secret_here
-```
-
-### How Onramp Works
-
-Once set up, your x402 paywall will automatically show a "Get more USDC" button when users need to fund their wallets. 
-
-1. **Generates session token**: Your backend securely creates a session token using CDP's API
-2. **Opens secure onramp**: User is redirected to Coinbase Onramp with the session token
-3. **No exposed data**: Wallet addresses and app IDs are never exposed in URLs
-
-### Troubleshooting Onramp
-
-#### Common Issues
-
-1. **"Missing CDP API credentials"**
-    - Ensure `CDP_API_KEY_ID` and `CDP_API_KEY_SECRET` are set
-    - Verify you're using **Secret API Keys**, not Client API Keys
-
-2. **"Failed to generate session token"**
-    - Check your CDP Secret API key has proper permissions
-    - Verify your project has Onramp enabled
-
-3. **API route not found**
-    - Ensure you've added the session token route: `app.post("/your-path", POST)`
-    - Check that your route path matches your `sessionTokenEndpoint` configuration
-    - Verify the import: `import { POST } from "x402-hono/session-token"`
-    - Example: If you configured `sessionTokenEndpoint: "/api/custom/onramp"`, add `app.post("/api/custom/onramp", POST)`
-
+  - Multi-network support: Works with EVM and Solana networks
+  - Automatic payment handling: Client automatically handles 402 responses
+  - Payment confirmation: Optional callback to confirm payments before execution
+  - Flexible signers: Support for single-network and multi-network wallet signers
+  - Network detection: Automatically detects wallet capabilities and selects compatible payment methods
+  - Facilitator integration: Fetches network-specific metadata (e.g., Solana fee payers)
 
 ## Resources
 
-- [x402 Protocol](https://x402.org)
-- [CDP Documentation](https://docs.cdp.coinbase.com)
-- [CDP Discord](https://discord.com/invite/cdp)
+  - x402 Protocol
+  - Model Context Protocol
+
