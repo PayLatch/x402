@@ -1,5 +1,5 @@
 {
-  "name": "@paylatch/hono",
+  "name": "@paylatch/x402-hono",
   "version": "0.7.1",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -42,7 +42,7 @@
     "@solana/kit": "^2.1.1",
     "hono": "^4.7.1",
     "viem": "^2.21.26",
-    "x402": "workspace:^",
+    "@paylatch/x402": "workspace:^",
     "zod": "^3.24.2"
   },
   "exports": {

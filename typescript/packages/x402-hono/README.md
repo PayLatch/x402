@@ -5,14 +5,14 @@ Hono middleware integration for the x402 Payment Protocol. This package allows y
 ## Installation
 
 ```bash
-npm install x402-hono
+npm install @paylatch/x402-hono
 ```
 
 ## Quick Start
 
 ```typescript
 import { Hono } from "hono";
-import { paymentMiddleware, Network } from "x402-hono";
+import { paymentMiddleware, Network } from "@paylatch/x402-hono";
 
 const app = new Hono();
 
@@ -118,7 +118,7 @@ Add a session token endpoint to your Hono app:
 
 ```typescript
 import { Hono } from "hono";
-import { POST } from "x402-hono/session-token";
+import { POST } from "@paylatch/x402-hono/session-token";
 
 const app = new Hono();
 

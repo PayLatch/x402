@@ -22,9 +22,9 @@ import type { ZodRawShape } from "zod";
 import { Address, getAddress } from "viem";
 import { Address as SolanaAddress } from "@solana/kit";
 
-import { processPriceToAtomicAmount } from "x402/shared";
-import { exact } from "x402/schemes";
-import { useFacilitator } from "x402/verify";
+import { processPriceToAtomicAmount } from "@paylatch/x402/shared";
+import { exact } from "@paylatch/x402/schemes";
+import { useFacilitator } from "@paylatch/x402/verify";
 import type {
   FacilitatorConfig,
   Network,
@@ -36,7 +36,7 @@ import type {
   SupportedEVMNetworks,
   SupportedSVMNetworks,
   ERC20TokenAmount
-} from "x402/types";
+} from "@paylatch/x402/types";
 import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
 /*
@@ -335,8 +335,8 @@ export function withX402Client<T extends MCPClient>(
     options?: RequestOptions
   ): ReturnType<typeof client.callTool> => {
     // Import dynamically to avoid issues
-    const { createPaymentHeader, selectPaymentRequirements } = await import("x402/client");
-    const { isMultiNetworkSigner, isSvmSignerWallet, evm, ChainIdToNetwork } = await import("x402/types");
+    const { createPaymentHeader, selectPaymentRequirements } = await import("@paylatch/x402/client");
+    const { isMultiNetworkSigner, isSvmSignerWallet, evm, ChainIdToNetwork } = await import("@paylatch/x402/types");
 
     // call the tool
     const res = await _callTool(params, resultSchema, options);
@@ -447,5 +447,5 @@ export type {
   MultiNetworkSigner,
   PaymentRequirements,
   FacilitatorConfig
-} from "x402/types";
+} from "@paylatch/x402/types";
 export type { Address as SolanaAddress } from "@solana/kit";

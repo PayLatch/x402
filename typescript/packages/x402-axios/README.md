@@ -5,7 +5,7 @@ A utility package that extends Axios to automatically handle 402 Payment Require
 ## Installation
 
 ```bash
-npm install x402-axios
+npm install @paylatch/x402-axios
 ```
 
 ## Quick Start
@@ -13,7 +13,7 @@ npm install x402-axios
 ```typescript
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { withPaymentInterceptor } from "x402-axios";
+import { withPaymentInterceptor } from "@paylatch/x402-axios";
 import axios from "axios";
 import { baseSepolia } from "viem/chains";
 

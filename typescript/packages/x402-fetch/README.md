@@ -5,7 +5,7 @@ A utility package that extends the native `fetch` API to automatically handle 40
 ## Installation
 
 ```bash
-npm install x402-fetch
+npm install @paylatch/x402-fetch
 ```
 
 ## Quick Start
@@ -13,7 +13,7 @@ npm install x402-fetch
 ```typescript
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "x402-fetch";
+import { wrapFetchWithPayment } from "@paylatch/x402-fetch";
 import { baseSepolia } from "viem/chains";
 
 // Create a wallet client
@@ -63,7 +63,7 @@ A wrapped fetch function that automatically handles 402 responses by:
 import { config } from "dotenv";
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "x402-fetch";
+import { wrapFetchWithPayment } from "@paylatch/x402-fetch";
 import { baseSepolia } from "viem/chains";
 
 config();

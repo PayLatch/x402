@@ -5,14 +5,14 @@ Express middleware integration for the x402 Payment Protocol. This package allow
 ## Installation
 
 ```bash
-npm install x402-express
+npm install @paylatch/x402-express
 ```
 
 ## Quick Start
 
 ```typescript
 import express from "express";
-import { paymentMiddleware, Network } from "x402-express";
+import { paymentMiddleware, Network } from "@paylatch/x402-express";
 
 const app = express();
 
@@ -116,7 +116,7 @@ Add a session token endpoint to your Express app:
 
 ```typescript
 import express from "express";
-import { POST } from "x402-express/session-token";
+import { POST } from "@paylatch/x402-express/session-token";
 
 const app = express();
 
